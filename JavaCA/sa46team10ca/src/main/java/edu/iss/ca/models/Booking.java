@@ -25,9 +25,9 @@ public class Booking {
 	@Column(name = "bookingid")
 	private int bookingid;
 	
-//	@ManyToOne
-//	@JoinColumn(name = "userid")
-//	private User user;
+	@ManyToOne
+	@JoinColumn(name = "userid")
+	private User user;
 	
 	@ManyToOne
 	@JoinColumn(name = "facilityid")
@@ -53,8 +53,8 @@ public class Booking {
 
 	public Booking(User user, Facility facility, TimeSlot timeslot, String status) {
 		super();
-		this.bookingid = bookingid;
-//		this.user = user;
+		
+		this.user = user;
 		this.facility = facility;
 		this.timeslot = timeslot;
 		this.status = status;
@@ -62,8 +62,9 @@ public class Booking {
 	
 	public Booking(User user, Facility facility, TimeSlot timeslot, Date date, String status) {
 		super();
-		this.bookingid = bookingid;
-//		this.user = user;
+
+
+		this.user = user;
 		this.facility = facility;
 		this.timeslot = timeslot;
 		this.date = date;
@@ -94,13 +95,13 @@ public class Booking {
 		this.bookingid = bookingid;
 	}
 
-//	public User getUserid() {
-//		return user;
-//	}
-//
-//	public void setUserid(User userid) {
-//		this.user = userid;
-//	}
+	public User getUserid() {
+		return user;
+	}
+
+	public void setUserid(User userid) {
+		this.user = userid;
+	}
 
 	public Date getDate() {
 		return date;

@@ -1,9 +1,11 @@
-package edu.iss.ca.controller;
+ 	package edu.iss.ca.controller;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -26,6 +28,7 @@ import edu.iss.ca.models.TimeSlot;
 import edu.iss.ca.service.BookingService;
 import edu.iss.ca.service.FacilityService;
 import edu.iss.ca.service.TimeSlotService;
+import edu.iss.ca.controller.CommonController;
 
 @RequestMapping(value="/facility")
 @Controller
@@ -219,10 +222,11 @@ public class FacilityController {
 	@RequestMapping(value = "/booking/process", method = RequestMethod.POST)
 	public ModelAndView testing(@ModelAttribute Booking booking, BindingResult result,
 			final RedirectAttributes redirectAttributes,
-			@RequestParam("ts") int[] tsIds) throws Exception {
+			@RequestParam("ts") int[] tsIds, HttpSession session) throws Exception {
 		try
 		{
 			ArrayList<TimeSlot> ts = new ArrayList<TimeSlot>();
+			UserSession us = (UserSession) session.getAttribute("USERSESSION");
 			for(int id : tsIds) {
 				TimeSlot t = tsService.findTimeSlot(id);
 				ts.add(t);
@@ -230,13 +234,13 @@ public class FacilityController {
 			
 			for(TimeSlot x : ts) {
 				Booking multi = 
-						new Booking(null, booking.getFacility(), 
+						new Booking(us.getUser(), booking.getFacility(), 
 						booking.getTimeslot(), booking.getStatus());
 				multi.setDate(booking.getDate());
 				multi.setTimeslot(x);
 				bService.createBooking(multi);
 			}
-			ModelAndView mav = new ModelAndView("booking-history");
+			ModelAndView mav = new ModelAndView("redirect:/facility/booking/history");
 			return mav;
 		}
 		
@@ -252,6 +256,7 @@ public class FacilityController {
 	@RequestMapping(value = "/bookingslot", method = RequestMethod.POST)
 	public ModelAndView testing1(@ModelAttribute Booking booking, BindingResult result,
 			final RedirectAttributes redirectAttributes,
+
 			@RequestParam("facId") int fid) throws Exception {
 		
 		try
@@ -280,5 +285,25 @@ public class FacilityController {
 		System.out.print("Exception");
 		return "Exception";
 	}
-
+	
+	@RequestMapping(value="/booking/history",method=RequestMethod.GET)
+	public ModelAndView bookingHistory(HttpSession session)
+	{
+		//int userid = 1;
+		ModelAndView mav = new ModelAndView("booking-history");
+		//add the session code here
+		UserSession us = (UserSession) session.getAttribute("USERSESSION");
+		
+		ArrayList<Booking> history = bService.findHistoryByUser(us.getUser().getUserid());
+		mav.addObject("history", history);
+		return mav;
+	}
+	
+	@RequestMapping(value="/booking/cancel/{id}",method=RequestMethod.GET)
+	public ModelAndView cancelBooking(@PathVariable String id)
+	{
+		ModelAndView mav = new ModelAndView("redirect:/facility/booking/history");
+		bService.cancelBooking(Integer.parseInt(id));
+		return mav;
+	}
 }
