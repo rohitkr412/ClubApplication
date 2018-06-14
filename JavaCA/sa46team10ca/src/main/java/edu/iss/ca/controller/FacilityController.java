@@ -10,6 +10,8 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -35,6 +37,8 @@ import edu.iss.ca.controller.CommonController;
 
 @RequestMapping(value="/facility")
 @Controller
+@Configuration
+@ComponentScan("edu.iss.ca.service")
 public class FacilityController {
 	@Autowired
 	private FacilityService fService;
@@ -160,16 +164,16 @@ public class FacilityController {
 		return null;
 	}
 	
-	@RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
-	public ModelAndView deleteFacility(@PathVariable String id, final RedirectAttributes redirectAttributes)
+	@RequestMapping(value = "/delete/{facilityid}", method = RequestMethod.GET)
+	public ModelAndView deleteFacility(@PathVariable String facilityid, final RedirectAttributes redirectAttributes)
 			throws Exception
 	{
 		try
 		{
 			ModelAndView mav = new ModelAndView("redirect:/facility/list");
-			Facility facility = fService.findFacility(Integer.parseInt(id));
+			Facility facility = fService.findFacility(Integer.parseInt(facilityid));
 			fService.removeFacility(facility);
-			String message = "The facility " + facility.getFacilityid() + " was successfully deleted.";
+			String message = "The facility was successfully deleted.";
 
 			redirectAttributes.addFlashAttribute("message", message);
 			return mav;
@@ -311,44 +315,4 @@ public class FacilityController {
 		return mav;
 	}
 	
-	@RequestMapping(value = "/bookingAll", method=RequestMethod.GET)
-	public ModelAndView viewAllBooking() throws Exception
-	{
-		try
-		{
-			ModelAndView mav = new ModelAndView("bookingAll");
-			List<Booking> bookingList = bService.findAllBooking();
-			mav.addObject("bookingList", bookingList);
-			return mav;
-		}
-		catch(Exception e)
-		{
-			String exceptionOccurred = "Exception";
-			if(exceptionOccurred.equalsIgnoreCase("Exception"))
-				throw new Exception("Exception");
-		}
-		return null;
-	}
-	@RequestMapping(value = "/delete/{bookingid}", method = RequestMethod.GET)
-	public ModelAndView deleteUser(@PathVariable String bookingid, final RedirectAttributes redirectAttributes)
-			throws Exception
-	{
-		try
-		{
-			ModelAndView mav = new ModelAndView("bookingAll");
-			Booking booking = bService.findBooking(Integer.parseInt(bookingid));
-			bService.removeBooking(booking);
-			String message = "The booking was successfully deleted.";
-
-			redirectAttributes.addFlashAttribute("message", message);
-			return mav;
-		}
-		catch(Exception e)
-		{
-			String exceptionOccurred = "Exception";
-			if(exceptionOccurred.equalsIgnoreCase("Exception"))
-				throw new Exception("Exception");
-		}
-		return null;
-	}
 }
