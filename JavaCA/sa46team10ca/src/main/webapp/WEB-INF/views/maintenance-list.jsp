@@ -12,28 +12,24 @@
 				<th><h4>Facility</h4></th>
 				<th><h4>Date</h4></th>
 				<th><h4>Time Slot</h4></th>
-				<th><h4>Edit</h4></th>
 				<th><h4>Delete</h4></th>
 			</tr>
 		</thead>
 
 		<tbody>
 
-			<c:forEach var="maintenace" items="${mList}">
+			<c:forEach var="maintenance" items="${mList}">
 
 				<tr class="listRecord">
 
-					<td>${maintenace.facilityid.name }</td>
+					<td>${maintenance.facilityid.name }</td>
 
-					<td>${maintenace.date}</td>
+					<td>${maintenance.date}</td>
 
-					<td>${maintenace.timeslotid.timeslot }</td>
+					<td>${maintenance.timeslotid.timeslot }</td>
 
 					<td><a
-						href="${pageContext.request.contextPath}/booking/edit/${booking.bookingid}.html"><spring:message
-								code="caption.edit" /></a></td>
-					<td><a
-						href="${pageContext.request.contextPath}/booking/delete/${booking.bookingid}.html"><spring:message
+						href="${pageContext.request.contextPath}/maintenance/delete/${maintenance.maintenanceid}.html"><spring:message
 								code="caption.delete" /></a></td>
 
 				</tr>

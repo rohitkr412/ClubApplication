@@ -10,16 +10,15 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import edu.iss.ca.models.Booking;
 import edu.iss.ca.models.Facility;
 import edu.iss.ca.models.Maintenance;
 import edu.iss.ca.models.TimeSlot;
@@ -141,12 +140,12 @@ public class MaintenanceController {
 		return null;
 	}
 	
-	@ExceptionHandler(value = Exception.class)
-	public String handleException(Exception e)
-	{
-		System.out.print("Exception");
-		return "Exception";
-	}
+//	@ExceptionHandler(value = Exception.class)
+//	public String handleException(Exception e)
+//	{
+//		System.out.print("Exception");
+//		return "Exception";
+//	}
 	
 	@RequestMapping(value = "/list", method=RequestMethod.GET)
 	public ModelAndView facilityListPage() throws Exception
@@ -165,5 +164,28 @@ public class MaintenanceController {
 				throw new Exception("Exception");
 		}
 		return null;
+	}
+	
+	@RequestMapping(value = "/delete/{maintenanceid}", method = RequestMethod.GET)
+	public ModelAndView deleteMaintenance(@PathVariable String maintenanceid, final RedirectAttributes redirectAttributes)
+			throws Exception
+	{
+//		try
+//		{
+			ModelAndView mav = new ModelAndView("redirect:/maintenance/list");
+			Maintenance maintenance = mService.findMaintenance(Integer.parseInt(maintenanceid));
+			mService.removeMaintenance(maintenance);
+			String message = "The maintenance was successfully deleted.";
+
+			redirectAttributes.addFlashAttribute("message", message);
+			return mav;
+//		}
+//		catch(Exception e)
+//		{
+//			String exceptionOccurred = "Exception";
+//			if(exceptionOccurred.equalsIgnoreCase("Exception"))
+//				throw new Exception("Exception");
+//		}
+//		return null;
 	}
 }

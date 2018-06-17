@@ -10,8 +10,6 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -29,16 +27,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import edu.iss.ca.models.Booking;
 import edu.iss.ca.models.Facility;
 import edu.iss.ca.models.TimeSlot;
-import edu.iss.ca.models.User;
 import edu.iss.ca.service.BookingService;
 import edu.iss.ca.service.FacilityService;
+import edu.iss.ca.service.MaintenanceService;
 import edu.iss.ca.service.TimeSlotService;
 import edu.iss.ca.controller.CommonController;
 
 @RequestMapping(value="/facility")
 @Controller
-@Configuration
-@ComponentScan("edu.iss.ca.service")
 public class FacilityController {
 	@Autowired
 	private FacilityService fService;
@@ -48,6 +44,9 @@ public class FacilityController {
 	
 	@Autowired
 	private TimeSlotService tsService;
+	
+	@Autowired
+	private MaintenanceService mService;
 	
 	@InitBinder("booking")
 	private void initCourseBinder(WebDataBinder binder) {
@@ -164,16 +163,16 @@ public class FacilityController {
 		return null;
 	}
 	
-	@RequestMapping(value = "/delete/{facilityid}", method = RequestMethod.GET)
-	public ModelAndView deleteFacility(@PathVariable String facilityid, final RedirectAttributes redirectAttributes)
+	@RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
+	public ModelAndView deleteFacility(@PathVariable String id, final RedirectAttributes redirectAttributes)
 			throws Exception
 	{
 		try
 		{
 			ModelAndView mav = new ModelAndView("redirect:/facility/list");
-			Facility facility = fService.findFacility(Integer.parseInt(facilityid));
+			Facility facility = fService.findFacility(Integer.parseInt(id));
 			fService.removeFacility(facility);
-			String message = "The facility was successfully deleted.";
+			String message = "The facility " + facility.getFacilityid() + " was successfully deleted.";
 
 			redirectAttributes.addFlashAttribute("message", message);
 			return mav;
@@ -263,17 +262,24 @@ public class FacilityController {
 	@RequestMapping(value = "/bookingslot", method = RequestMethod.POST)
 	public ModelAndView testing1(@ModelAttribute Booking booking, BindingResult result,
 			final RedirectAttributes redirectAttributes,
-
+			HttpSession session,
 			@RequestParam("facId") int fid) throws Exception {
 		
 		try
 		{
 			ModelAndView mav = new ModelAndView("bookingslot");
+			UserSession us = (UserSession) session.getAttribute("USERSESSION");
 			ArrayList<TimeSlot> tsList = tsService.findAllTimeSlot();
 			Facility f = fService.findFacility(fid);
 			booking.setFacility(f);
+			ArrayList<Integer> bSlots = bService.findBookedSlots(us.getUser().getUserid(), 
+					booking.getDate(), f.getFacilityid());
+			ArrayList<Integer> mSlots = mService.findSlotsUnderMaintenance(booking.getDate(), f.getFacilityid());
+			mSlots.add(1);
 			mav.addObject("booking", booking);
 			mav.addObject("tslist", tsList);
+			mav.addObject("bslots", bSlots);
+			mav.addObject("mslots", mSlots);
 			return mav;
 		}
 		
@@ -314,5 +320,4 @@ public class FacilityController {
 		bService.cancelBooking(Integer.parseInt(id));
 		return mav;
 	}
-	
 }

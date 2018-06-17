@@ -1,6 +1,7 @@
- 	package edu.iss.ca.controller;
+package edu.iss.ca.controller;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,10 +15,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import edu.iss.ca.models.Booking;
+import edu.iss.ca.models.Facility;
+import edu.iss.ca.models.TimeSlot;
 import edu.iss.ca.service.BookingService;
 import edu.iss.ca.service.FacilityService;
 import edu.iss.ca.service.TimeSlotService;
@@ -65,9 +69,13 @@ public class BookingController {
 	public ModelAndView editBookingPage(@PathVariable String id) throws Exception{
 		try
 		{
-			ModelAndView mav = new ModelAndView("booking-edit");
+			ModelAndView mav = new ModelAndView("booking-edit","booking", new Booking());
 			Booking booking = bService.findBooking(Integer.parseInt(id));
 			mav.addObject("booking", booking);
+			ArrayList<Facility> fList = fService.findAllFacility();
+			ArrayList<TimeSlot> tsList = tsService.findAllTimeSlot();
+			mav.addObject("flist", fList);
+			mav.addObject("tslist", tsList);
 			return mav;
 		}
 		catch(Exception e)
@@ -81,13 +89,19 @@ public class BookingController {
 	
 	@RequestMapping(value = "/edit/{id}", method = RequestMethod.POST)
 	public ModelAndView editUser(@ModelAttribute Booking booking, BindingResult result,
-			@PathVariable String userid, final RedirectAttributes redirectAttributes) throws Exception {
+			@PathVariable String id, final RedirectAttributes redirectAttributes,
+			@RequestParam("facId") String fid) throws Exception {
 		try
 		{
 			if (result.hasErrors())
 				return new ModelAndView("booking-edit");
+			String url;
+				url="redirect:/booking/list";
 			
-			ModelAndView mav = new ModelAndView("redirect:/booking/list");
+			Facility f = fService.findFacility(Integer.parseInt(fid));
+			
+			ModelAndView mav = new ModelAndView(url);
+			booking.setFacility(f);
 			String message = "Booking was successfully updated.";
 			bService.changeBooking(booking);
 			redirectAttributes.addFlashAttribute("message", message);
